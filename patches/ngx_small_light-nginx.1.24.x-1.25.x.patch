@@ -1,0 +1,12 @@
+--- ngx_small_light/src/ngx_http_small_light_module.h	2023-03-03 16:34:44.725614803 +0900
++++ ngx_small_light/src/ngx_http_small_light_module.h.new	2023-03-03 16:33:13.163466100 +0900
+@@ -23,6 +23,8 @@
+ #ifndef NGX_HTTP_SMALL_LIGHT_MODULE_H
+ #define NGX_HTTP_SMALL_LIGHT_MODULE_H
+
++#include <linux/ipv6.h>
++
+ #include <ngx_config.h>
+ #include <ngx_core.h>
+ #include <ngx_http.h>
+EOF
