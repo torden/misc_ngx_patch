@@ -35,6 +35,7 @@ patch -p0 < ngx_small_light-nginx.1.24.x-1.25.x.patch
 > As you know that project is currently inactive.
 
 ```bash
+cd nginx-1.x.x/
 wget https://raw.githubusercontent.com/torden/misc_ngx_patch/main/patches/ngx_http_auth_crowd_module-support-nginx-1.24.x-1.25.x.patch
 patch -p0 < ngx_http_auth_crowd_module-support-nginx-1.24.x-1.25.x.patch
 ```
@@ -47,6 +48,7 @@ patch -p0 < ngx_http_auth_crowd_module-support-nginx-1.24.x-1.25.x.patch
 > Testing is required in additional environments.
 
 ```bash
+cd nginx-1.x.x/
 wget https://raw.githubusercontent.com/torden/misc_ngx_patch/main/patches/nginx_http_image_filter_module-png-transparent_n_resizing-issue-nginx-1.xx.x-1.25.x.c.patch
 patch -p0 < nginx_http_image_filter_module-png-transparent_n_resizing-issue-nginx-1.xx.x-1.25.x.c.patch
 ```
