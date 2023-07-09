@@ -1,0 +1,52 @@
+--- ngx_http_auth_crowd_module-1.0.1/ngx_http_auth_crowd_module.c	2013-10-29 06:02:57.000000000 +0900
++++ ngx_http_auth_crowd_module-1.0.1/ngx_http_auth_crowd_module.c.new	2023-02-27 14:12:49.709931846 +0900
+@@ -99,10 +99,10 @@
+
+ static ngx_conf_post_handler_pt  ngx_http_auth_crowd_p = ngx_http_auth_crowd;
+
+-static ngx_int_t
+-ngx_http_auth_crowd_get_token(ngx_http_request_t *r, ngx_str_t *name, ngx_str_t *token)
++static ngx_table_elt_t
++*ngx_http_auth_crowd_get_token(ngx_http_request_t *r, ngx_str_t *name, ngx_str_t *token)
+ {
+-	return  ngx_http_parse_multi_header_lines(&r->headers_in.cookies, name, token);
++	return  ngx_http_parse_multi_header_lines(r, r->headers_in.cookie, name, token);
+ }
+
+ static int
+@@ -466,6 +466,7 @@
+ ngx_http_auth_crowd_handler(ngx_http_request_t *r)
+ {
+ 	ngx_int_t rc;
++	ngx_table_elt_t *hrc;
+ 	ngx_http_auth_crowd_ctx_t *ctx;
+ 	ngx_http_auth_crowd_loc_conf_t *alcf;
+ 	ngx_str_t token, name;
+@@ -495,8 +496,8 @@
+ 	/* Validate old SSO session */
+ 	name.data = (u_char *) ctx->name;
+ 	name.len = strlen(ctx->name);
+-	rc = ngx_http_auth_crowd_get_token(r, &name,  &token);
+-	if (rc != NGX_DECLINED) {
++	hrc = ngx_http_auth_crowd_get_token(r, &name,  &token);
++	if (hrc != NULL) {
+ 		rc = validate_sso_session_token(r, alcf, (const char *)token.data);
+ 		if (rc != NGX_OK)
+ 			return ngx_http_auth_crowd_set_realm(r, &alcf->realm);
+@@ -520,13 +521,9 @@
+ void
+ print_headers(ngx_http_request_t *r, ngx_log_t *log)
+ {
+-	ngx_uint_t i;
+-	ngx_array_t *cookie = &r->headers_in.cookies;
+-	ngx_table_elt_t **elem;
+-	elem = cookie->elts;
+-
+-	for (i = 0; i < cookie->nelts; i++) {
+-		ngx_log_debug(NGX_LOG_DEBUG_HTTP, log, 0, "'%V' -> '%V'", &elem[i]->key, &elem[i]->value);
++	ngx_table_elt_t *cookie = r->headers_in.cookie;
++	for (; cookie; cookie = cookie->next) {
++		ngx_log_debug(NGX_LOG_DEBUG_HTTP, log, 0, "'%V' -> '%V'", cookie->key, cookie->value);
+ 	}
+ }
+
