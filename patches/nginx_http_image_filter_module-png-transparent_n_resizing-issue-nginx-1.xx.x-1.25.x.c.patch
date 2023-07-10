@@ -1,12 +1,12 @@
---- src/http/modules/ngx_http_image_filter_module.c	2023-06-14 00:08:10.000000000 +0900
-+++ src/http/modules/ngx_http_image_filter_module.c.patch	2023-07-10 11:44:47.854930890 +0900
+--- src/http/modules/ngx_http_image_filter_module.c    2023-06-29 21:32:03.165251407 +0900
++++ src/http/modules/ngx_http_image_filter_module.c.patch   2023-06-29 21:41:46.542650186 +0900
 @@ -44,6 +44,7 @@
      ngx_uint_t                   angle;
      ngx_uint_t                   jpeg_quality;
      ngx_uint_t                   webp_quality;
 +    ngx_uint_t                   png_compression_level;
      ngx_uint_t                   sharpen;
- 
+
      ngx_flag_t                   transparency;
 @@ -54,6 +55,7 @@
      ngx_http_complex_value_t    *acv;
@@ -14,7 +14,7 @@
      ngx_http_complex_value_t    *wqcv;
 +    ngx_http_complex_value_t    *pclv;
      ngx_http_complex_value_t    *shcv;
- 
+
      size_t                       buffer_size;
 @@ -114,6 +116,8 @@
      ngx_command_t *cmd, void *conf);
@@ -28,7 +28,7 @@
 @@ -142,6 +146,13 @@
        0,
        NULL },
- 
+
 +    { ngx_string("image_filter_png_compression_level"),
 +      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
 +      ngx_http_image_filter_png_compression_level,
@@ -49,7 +49,7 @@
      ngx_buf_t                     *b;
      ngx_uint_t                     resize;
 @@ -856,19 +867,12 @@
- 
+
          if (transparent != -1) {
              palette = colors;
 -            red = gdImageRed(src, transparent);
@@ -59,19 +59,19 @@
              goto transparent;
          }
      }
- 
+
      palette = 0;
      transparent = -1;
 -    red = 0;
 -    green = 0;
 -    blue = 0;
- 
+
  transparent:
- 
+
 @@ -1038,10 +1042,6 @@
          }
      }
- 
+
 -    if (transparent != -1 && colors) {
 -        gdImageColorTransparent(dst, gdImageColorExact(dst, red, green, blue));
 -    }
@@ -81,7 +81,7 @@
          gdImageSharpen(dst, sharpen);
 @@ -1194,8 +1194,20 @@
          break;
- 
+
      case NGX_HTTP_IMAGE_PNG:
 -        out = gdImagePngPtr(img, size);
 -        failed = "gdImagePngPtr() failed";
@@ -100,7 +100,7 @@
 +        failed = "gdImagePngPtrEx() failed";
 +
          break;
- 
+
      case NGX_HTTP_IMAGE_WEBP:
 @@ -1292,12 +1304,14 @@
       *     conf->acv = NULL;
@@ -109,7 +109,7 @@
 +     *     conf->pclv = NULL;
       *     conf->shcv = NULL;
       */
- 
+
      conf->filter = NGX_CONF_UNSET_UINT;
      conf->jpeg_quality = NGX_CONF_UNSET_UINT;
      conf->webp_quality = NGX_CONF_UNSET_UINT;
@@ -120,7 +120,7 @@
 @@ -1349,6 +1363,16 @@
          }
      }
- 
+
 +    if (conf->png_compression_level == NGX_CONF_UNSET_UINT) {
 +
 +        /* -1 is libpng default compression level */
@@ -133,10 +133,10 @@
 +
      if (conf->sharpen == NGX_CONF_UNSET_UINT) {
          ngx_conf_merge_uint_value(conf->sharpen, prev->sharpen, 0);
- 
+
 @@ -1616,6 +1640,55 @@
- 
- 
+
+
  static char *
 +ngx_http_image_filter_png_compression_level(ngx_conf_t *cf, ngx_command_t *cmd,
 +    void *conf)
