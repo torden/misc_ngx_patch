@@ -1,5 +1,5 @@
 --- ngx_http_auth_crowd_module-1.0.1/ngx_http_auth_crowd_module.c	2013-10-29 06:02:57.000000000 +0900
-+++ ngx_http_auth_crowd_module-1.0.1/ngx_http_auth_crowd_module.c.new	2023-02-27 14:12:49.709931846 +0900
++++ ngx_http_auth_crowd_module-1.0.1/ngx_http_auth_crowd_module.c.patch	2023-07-12 19:40:58.118788414 +0900
 @@ -99,10 +99,10 @@
 
  static ngx_conf_post_handler_pt  ngx_http_auth_crowd_p = ngx_http_auth_crowd;
@@ -14,6 +14,15 @@
  }
 
  static int
+@@ -138,7 +138,7 @@
+ 	const char *domain = "\"domain\":\"";
+ 	const char *name   = "\"name\":\"";
+ 	const char *secure = "\"secure\":";
+-	char buff[6];
++	char buff[6] = {0x00,};
+ 	int ec1, ec2, ec3;
+
+ 	ec1 = parse_name_value(json, domain, cc->domain, 128, '"');
 @@ -466,6 +466,7 @@
  ngx_http_auth_crowd_handler(ngx_http_request_t *r)
  {
